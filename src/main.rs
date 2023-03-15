@@ -132,15 +132,16 @@ fn load_dat_file_as_string(filename: &str) -> String {
 fn load_arrays_from_dat_file(filename: &str) 
         -> (Array1<f32>, Array2<f32>, Array2<f32>, Array3<f32>) {
         
+    println!("Loading {}", filename);
     let buf = load_dat_file_as_string(filename);
 
     let mut tv: Vec<f32> = Vec::new();
     let mut lav: Vec<f32> = Vec::new();
     let mut flav: Vec<f32> = Vec::new();
-    
+   
+    println!("Parsing!");
     for block in buf.trim().split("\n\n\n") {
         let (tb, lab, mut flab) = parse_block(block);
-        println!("{} {}", tv.len(), tb);
 
         tv.push(tb);
         lav = lab;
