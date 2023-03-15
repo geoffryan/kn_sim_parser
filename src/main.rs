@@ -1,4 +1,5 @@
 use std::fs;
+use std::env;
 use std::str::FromStr;
 //use ndarray::prelude::*;
 use ndarray::{Array1, Array2, Array3, arr0};
@@ -188,14 +189,27 @@ fn parse_block(block: &str) -> (f32, Vec<f32>, Vec<f32>)
     (t, la, fla)
 }
 
-fn main() {
+fn main() -> Result<(), ()> {
 
-    let tup = parse_filename("Run_TP_dyn_all_lanth_wind1_all_md0.03_vd0.15_mw0.03_vw0.15_spec_2020-04-02.dat");
-    println!("{:?}", tup);
+    let args: Vec<String> = env::args().collect();
 
-    let spec = SpecLANL::new("../kn_lanl_data/kn_sim_cube_v1/Run_TS_dyn_all_lanth_wind1_all_md0.03_vd0.15_mw0.03_vw0.15_spec_2020-04-02.dat");
+    let nargs = args.len();
 
-    println!("Hello, world! {} {}", spec.md, spec.la[[0, 0]]);
+    if nargs < 3 {
+        println!("\nusage: $ lanl_parser [input_files.dat ...] output_dir");
+        println!("\nThis utility parses the LANL Kilonova spectrum .dat files \
+                 into HDF5 files.  The output files are placed in \
+                 output_dir. No transformations are done other than parsing \
+                 into single-precision floating-point values (f32).\n");
+        return Ok(());
+    }
 
-    spec.save_h5("../kn_lanl_data/kn_sim_cube_h5").unwrap();
+    let output_dir = &args[nargs-1];
+
+    for filename in args[1..(nargs-1)].iter() {
+        let spec = SpecLANL::new(filename);
+        spec.save_h5(&output_dir).unwrap();
+    }
+
+    Ok(())
 }
